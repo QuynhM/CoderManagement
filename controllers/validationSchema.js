@@ -18,13 +18,13 @@ const taskValidation = Joi.object({
   name: Joi.string().required(),
   description: Joi.string().required(),
   status: Joi.string().valid('pending', 'working', 'review', 'done', 'archive').required(),
-  isDeleted: Joi.boolean().default(false)
 });
 
 const browseTaskValidation = Joi.object({
   name: Joi.string(),
-  isDeleted: Joi.boolean().default(false),
-  status: Joi.string().valid('pending', 'working', 'review', 'done', 'archive')
+  status: Joi.string().valid('pending', 'working', 'review', 'done', 'archive'),
+  sort: Joi.string().valid('createdAt','updatedAt', 'name'),
+  order: Joi.string(),
 });
 
 const updateTaskValidation = Joi.object({

@@ -55,15 +55,13 @@ const getUserTasks = async (req, res, next) => {
     try {
       const { userId } = req.params;
 
-      const user = await User.findById(userId);
-
-      // Find all tasks assigned to the user
-      const tasks = await Task.find({ assignedTo: userId }).select('_id');
-
-      // Extract task IDs from the tasks
-      const taskIds = tasks.map(task => task._id);
-
-      sendResponse(res, 200, true, { userId: user._id, name: user.name, role: user.role, taskIds }, null, "User Tasks Retrieved Successfully");
+      const user = await User.findById(userId).populate({
+        path: 'tasks',
+        match: { isDeleted: false }
+    }).exec();
+      console.log("User:",user)
+      
+      sendResponse(res, 200, true, { user }, null, "User Tasks Retrieved Successfully");
       } catch (err) {
         next(err);
       }

@@ -1,4 +1,5 @@
 const Task = require('../models/Task');
+const User = require('../models/User');
 const { AppError, sendResponse } = require('../helpers/utils');
 const { taskValidation, updateTaskValidation, softDeleteTaskValidation, browseTaskValidation } = require('./validationSchema');
 
@@ -24,9 +25,19 @@ const browseTasks = async (req, res, next) => {
     if (validationResult.error) {
         throw new AppError(400, "Bad Request", validationResult.error.message);
     }
-    
+
     const query = { isDeleted: false, ...req.query };
-    const tasks = await Task.find(query);
+
+    
+    const { sort, order } = query;
+    console.log("Sort:", sort)
+    console.log("Order:", order)
+
+    const sortOption = {
+      [sort]: order,
+  }
+
+    const tasks = await Task.find(query).sort(sortOption);
     sendResponse(res, 200, true, { tasks }, null, "Browse Tasks successful");
   } catch (err) {
     next(err);
@@ -51,20 +62,18 @@ const assignTaskToUser = async (req, res, next) => {
     const taskId = req.params.taskId;
 
     let task = await Task.findById(taskId);
+    
     if (!task) {
       throw new AppError(404, "Not Found", "Task not found");
     }
 
-    // If the task is already assigned to a user, unassign it first
-    if (task.assignedTo) {
-      task = await Task.findByIdAndUpdate(taskId, { assignedTo: null }, { new: true });
+    if(!userId) {
+      task = await Task.findByIdAndUpdate(taskId, { assignedTo: null }, { new: true }).populate('assignedTo');
+    } else {
+      task = await Task.findByIdAndUpdate(taskId, { assignedTo: userId }, { new: true }).populate('assignedTo');
     }
 
-    // Assign the task to the new user
-    task = await Task.findByIdAndUpdate(taskId, { assignedTo: userId }, { new: true });
-
-    // Update the assignedTo field in the task object
-    task.assignedTo = userId;
+    await User.findByIdAndUpdate(userId, {$push: {tasks: taskId}}, { new: true });
 
     sendResponse(res, 200, true, { task }, null, "Assign Task to User Success");
   } catch (err) {

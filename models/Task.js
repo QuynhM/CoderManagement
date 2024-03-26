@@ -27,7 +27,7 @@ const taskSchema = mongoose.Schema({
     isDeleted: {
         type: Boolean,
         default: false
-    }
+    }   
 },
 { timestamps: { createdAt: true, updatedAt: true } });
 

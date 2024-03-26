@@ -17,7 +17,7 @@ router.put('/:taskId/assign', assignTaskToUser);
 // UPDATE TASK STATUS
 router.put('/:taskId', updateTaskStatus);
 
-// SOFT DELETE TASK
-router.put('/:taskId/delete', softDeleteTask);
+// DELETE TASK
+router.delete('/:taskId', softDeleteTask);
 
 module.exports = router;
